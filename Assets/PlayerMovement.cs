@@ -34,10 +34,13 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (isSkill1Start == false && isAttack == false)
+        // 현재 애니메이션 상태가 "Idle"이면 isAttack을 false로 설정
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") && isAttack)
         {
-            Move();
+            isAttack = false;  // 공격이 끝나고 Idle 상태일 때 이동 가능하게 설정
         }
+
+        Move();
 
         // 애니메이션 업데이트
         animator.SetFloat("Speed", dir.magnitude);
@@ -46,8 +49,8 @@ public class PlayerMovement : MonoBehaviour
         // 공격 입력 처리
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            animator.SetTrigger("Attack");
             isAttack = true;
+            animator.SetTrigger("Attack");
         }
         else if(Input.GetKeyDown(KeyCode.X))
         {
@@ -72,10 +75,18 @@ public class PlayerMovement : MonoBehaviour
     }
     public void Move()
     {
-        // 이동 방향 계산
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        dir = new Vector3(horizontal, 0, vertical).normalized;
+        if (isSkill1Start == false && isAttack == false)
+        {
+            // 이동 방향 계산
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
+            dir = new Vector3(horizontal, 0, vertical).normalized;
+        }
+        else
+        {
+            print("공격중이거나 스킬 사용중입니다.");
+            rb.velocity = Vector3.zero;
+        }
 
     }
     public int AttackCount
@@ -90,8 +101,8 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(2f);
         isSkill1Start = false;
     }
-    public void AtkFalseTiming()
+    public void AtkTureTiming()
     {
-        isAttack = false;
+        isAttack = true;
     }
 }
