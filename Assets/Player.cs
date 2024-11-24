@@ -16,6 +16,8 @@ public class Player : Character
     [SerializeField] private bool isAttack;
     [Header("WeaponHitBox")]
     [SerializeField]private Collider weaponHitBox;
+    [Header("WeaponTrail")]
+    public GameObject WeaponTrail;
 
 
     // Delegate 선언
@@ -31,6 +33,7 @@ public class Player : Character
         isAttack = false;
         usingSkillX = false;
         isDash = false;
+        WeaponTrail.SetActive(false);
 
         // Delegate에 초기 스킬인 WhirlWind 메서드 할당
         currentSkill = WhirlWind;   
@@ -62,6 +65,12 @@ public class Player : Character
         if (Input.GetKeyDown(KeyCode.Space) && isDash == false)
         {
             StartCoroutine(Dodge());
+        }
+
+        //피격 테스트
+        if(Input.GetKeyDown(KeyCode.V))
+        {
+            StartCoroutine(TakeDamage());
         }
     }
     private void FixedUpdate()
@@ -95,8 +104,9 @@ public class Player : Character
         isDash = true;
         animator.SetTrigger("Dodge");
         isAttack = false;
+        WeaponTrail.SetActive(false);
         //스킬 사용 중 회피 시 초기화 (쿨타임은 초기화 X)
-        if(usingSkillX == true)
+        if (usingSkillX == true)
         {
             usingSkillX = false;
         }
@@ -133,10 +143,22 @@ public class Player : Character
         yield return new WaitForSeconds(dashCooltime);
     }
 
+    protected override IEnumerator TakeDamage()
+    {
+        isHit = true;   //피격중엔 무적
+        animator.SetTrigger("Hit");
+        curHp -= 0.5f;
+        CameraShake.instance.ShakeCamera(1.5f, 0.5f);
+        Time.timeScale = 0.5f;
+        yield return new WaitForSeconds(0.5f);
+        isHit = false;  //피격 무적 해제
+        Time.timeScale = 1f;
+    }
 
 
     protected override void Attack()
     {
+        WeaponTrail.SetActive(true);
         isAttack = true;
         animator.SetTrigger("Attack");
         weaponHitBox.enabled = true;
@@ -145,10 +167,11 @@ public class Player : Character
     {
         if(weaponHitBox.enabled == true)
         {
+            WeaponTrail.SetActive(false);
             weaponHitBox.enabled = false;
         }
     }
-
+    
 
     private void Skill_X(SkillDelegate skillToExecute)  // 일반스킬
     {
@@ -166,10 +189,12 @@ public class Player : Character
     private void WhirlWind()
     {
         usingSkillX = true;
+        WeaponTrail.SetActive(true);
         animator.SetTrigger("SKILL1");
     }
     public void isSkillActive()
     {
         usingSkillX = false;
+        WeaponTrail.SetActive(false);
     }
 }

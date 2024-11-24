@@ -19,4 +19,8 @@ public class Enemy : Character
     {
         throw new System.NotImplementedException();
     }
+    protected override IEnumerator TakeDamage()
+    {
+        throw new System.NotImplementedException(); 
+    }
 }

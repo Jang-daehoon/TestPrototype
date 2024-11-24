@@ -16,6 +16,7 @@ public abstract class Character : MonoBehaviour
     [SerializeField] protected float damage;
     [SerializeField] protected float moveSpeed;
     [SerializeField] protected float rotSpeed;
+    [SerializeField] protected bool isHit;
     [SerializeField] protected bool isDead;
     [SerializeField] protected Vector3 dir = Vector3.zero;
 
@@ -39,4 +40,5 @@ public abstract class Character : MonoBehaviour
         animator.SetFloat("Speed", dir.magnitude);
     }
     protected abstract void Attack();  //일반공격
+    protected abstract IEnumerator TakeDamage();   //피격
 }
