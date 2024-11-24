@@ -17,7 +17,6 @@ public class PlayerMovement : MonoBehaviour
     public bool isSkill1Start;
     public bool isAttack;
     [SerializeField] private bool isGround = false;
-    public LayerMask layer;
 
     private void Awake()
     {
@@ -44,7 +43,6 @@ public class PlayerMovement : MonoBehaviour
 
         // 애니메이션 업데이트
         animator.SetFloat("Speed", dir.magnitude);
-        animator.SetFloat("velocityY", rb.velocity.y);
 
         // 공격 입력 처리
         if (Input.GetKeyDown(KeyCode.Z))
@@ -72,6 +70,8 @@ public class PlayerMovement : MonoBehaviour
             // 이동 처리
             rb.MovePosition(transform.position + dir * speed * Time.deltaTime);
         }
+        else 
+            rb.velocity = Vector3.zero;
     }
     public void Move()
     {
@@ -81,11 +81,6 @@ public class PlayerMovement : MonoBehaviour
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
             dir = new Vector3(horizontal, 0, vertical).normalized;
-        }
-        else
-        {
-            print("공격중이거나 스킬 사용중입니다.");
-            rb.velocity = Vector3.zero;
         }
 
     }
