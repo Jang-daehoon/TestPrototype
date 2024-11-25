@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class Player : Character
 {
@@ -18,10 +19,11 @@ public class Player : Character
     [SerializeField]private Collider weaponHitBox;
     [Header("WeaponTrail")]
     public GameObject WeaponTrail;
+    public ParticleSystem[] AttackParticle;
 
 
     // Delegate 선언
-    private delegate void SkillDelegate();
+    private delegate IEnumerator SkillDelegate();
     private SkillDelegate currentSkill;  // 현재 사용할 스킬을 담을 변수
 
     private void Awake()
@@ -40,8 +42,8 @@ public class Player : Character
     }
     private void Update()
     {
-        // 현재 애니메이션 상태가 "Idle"이면 isAttack을 false로 설정
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") && isAttack)
+        // 현재 애니메이션 상태가 "ArchorIdle"이면 isAttack을 false로 설정
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("ArchorIdle") && isAttack)
         {
             isAttack = false;  // 공격이 끝나고 Idle 상태일 때 이동 가능하게 설정
             WeaponHitBoxTogle(weaponHitBox);
@@ -70,7 +72,7 @@ public class Player : Character
         //피격 테스트
         if(Input.GetKeyDown(KeyCode.V))
         {
-            StartCoroutine(TakeDamage());
+            StartCoroutine(TakeDamage(damage));
         }
     }
     private void FixedUpdate()
@@ -143,18 +145,21 @@ public class Player : Character
         yield return new WaitForSeconds(dashCooltime);
     }
 
-    protected override IEnumerator TakeDamage()
+    protected override IEnumerator TakeDamage(float damage)
     {
         isHit = true;   //피격중엔 무적
         animator.SetTrigger("Hit");
-        curHp -= 0.5f;
+        curHp -= damage;
         CameraShake.instance.ShakeCamera(1.5f, 0.5f);
         Time.timeScale = 0.5f;
         yield return new WaitForSeconds(0.5f);
         isHit = false;  //피격 무적 해제
         Time.timeScale = 1f;
     }
-
+    protected override void Dead()
+    {
+        isDead = true;
+    }
 
     protected override void Attack()
     {
@@ -172,22 +177,27 @@ public class Player : Character
         }
     }
     
-
     private void Skill_X(SkillDelegate skillToExecute)  // 일반스킬
     {
         if (skillToExecute != null && usingSkillX == false)
         {
-            skillToExecute();  // 매개변수로 전달된 delegate 실행
+            StartCoroutine(skillToExecute());  // 매개변수로 전달된 delegate 실행
         }
     }
+
     private void Skill_C() //필살기
     {
 
     }
+    public void isAttackFalse()
+    {
+        isAttack = true;
+    }
 
     //SkillInterface를 만들어서 처리할 것.
-    private void WhirlWind()
+    private IEnumerator WhirlWind()
     {
+        yield return null;
         usingSkillX = true;
         WeaponTrail.SetActive(true);
         animator.SetTrigger("SKILL1");
@@ -197,4 +207,19 @@ public class Player : Character
         usingSkillX = false;
         WeaponTrail.SetActive(false);
     }
+    public void ParticlePlay(int i)
+    {
+        // 플레이어의 위치와 바라보는 방향으로 파티클 생성
+        Vector3 particlePosition = transform.position + transform.forward * 1f; // 1f는 파티클이 생성될 거리입니다. 필요에 따라 조정할 수 있습니다.
+                                                                                // 파티클이 플레이어 앞에 생성되도록 위치를 설정
+        ParticleSystem particle = Instantiate(AttackParticle[i], particlePosition, transform.rotation);
+        // 파티클 시스템의 StopAction을 Destroy로 설정합니다.
+        var main = particle.main;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        // 파티클의 위치를 설정하고 재생
+        particle.transform.position = particlePosition;
+        particle.Play();
+    }
+
 }
