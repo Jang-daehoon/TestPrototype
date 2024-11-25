@@ -39,7 +39,7 @@ public abstract class Character : MonoBehaviour
         rb.MovePosition(transform.position + dir * moveSpeed * Time.deltaTime);
         animator.SetFloat("Speed", dir.magnitude);
     }
-    protected abstract void Attack();  //일반공격
-    protected abstract IEnumerator TakeDamage(float damage);   //피격
-    protected abstract void Dead(); //사망
+    public abstract void Attack();  //일반공격
+    public abstract IEnumerator TakeDamage(float damage);   //피격
+    public abstract void Dead(); //사망
 }

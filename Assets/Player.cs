@@ -21,6 +21,10 @@ public class Player : Character
     public GameObject WeaponTrail;
     public ParticleSystem[] AttackParticle;
 
+    public float projectileSpeed;
+    public Transform firePoint; // 총알 발사 위치
+    public Bullet bulletProjectile;
+
 
     // Delegate 선언
     private delegate IEnumerator SkillDelegate();
@@ -107,19 +111,31 @@ public class Player : Character
         animator.SetTrigger("Dodge");
         isAttack = false;
         WeaponTrail.SetActive(false);
-        //스킬 사용 중 회피 시 초기화 (쿨타임은 초기화 X)
+
+        // 스킬 사용 중 회피 시 초기화 (쿨타임은 초기화 X)
         if (usingSkillX == true)
         {
             usingSkillX = false;
         }
 
-        // 대시 시작과 목표 위치 계산
+        // 입력된 이동 방향 계산
+        Vector3 inputDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized;
+
+        // 입력이 있을 경우 방향 변경, 없으면 현재 바라보는 방향 유지
+        if (inputDirection != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(inputDirection);
+            transform.rotation = targetRotation; // 캐릭터의 바라보는 방향 변경
+        }
+
+        // 대시 방향: 바라보는 방향 기준
+        Vector3 dodgeDirection = transform.forward;
+
+        // 대시 시작 위치와 목표 위치 계산
         Vector3 initialPosition = transform.position; // 대시 시작 위치
-        Vector3 targetPosition = initialPosition + transform.forward * dashDistance; // 대시 종료 위치
         float dashTimeElapsed = 0f;
 
         // 대시 효과 (무적 상태 설정 등)
-
         while (dashTimeElapsed < dashDuration)
         {
             // 남은 시간을 기준으로 속도 조절
@@ -129,7 +145,7 @@ public class Player : Character
             float currentSpeed = dashPower * remainingTime / dashDuration;
 
             // 이동 벡터
-            Vector3 movement = transform.forward * currentSpeed * Time.deltaTime;
+            Vector3 movement = dodgeDirection * currentSpeed * Time.deltaTime;
             transform.position += movement;
 
             dashTimeElapsed += Time.deltaTime;
@@ -139,13 +155,12 @@ public class Player : Character
         // 대시 종료
         isDash = false;
 
-        // 무적 레이어 복구
-
         // 대시 쿨타임 동안 추가 대시 불가능
         yield return new WaitForSeconds(dashCooltime);
     }
 
-    protected override IEnumerator TakeDamage(float damage)
+
+    public override IEnumerator TakeDamage(float damage)
     {
         isHit = true;   //피격중엔 무적
         animator.SetTrigger("Hit");
@@ -156,17 +171,21 @@ public class Player : Character
         isHit = false;  //피격 무적 해제
         Time.timeScale = 1f;
     }
-    protected override void Dead()
+    public override void Dead()
     {
         isDead = true;
     }
 
-    protected override void Attack()
+    public override void Attack()
     {
-        WeaponTrail.SetActive(true);
-        isAttack = true;
+        // 총알 생성
+        Bullet bullet = Instantiate(bulletProjectile, firePoint.position, transform.rotation);
+        // Bullet 스크립트에 속도와 데미지 전달
+        bullet.Speed = projectileSpeed;
+        bullet.Damage = damage; // 필요 시 플레이어의 공격력을 데미지로 설정
+
+        // 공격 애니메이션 실행
         animator.SetTrigger("Attack");
-        weaponHitBox.enabled = true;
     }
     public void WeaponHitBoxTogle(Collider weaponHitBox)
     {

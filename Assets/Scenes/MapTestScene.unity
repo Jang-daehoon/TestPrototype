@@ -2113,6 +2113,9 @@ MonoBehaviour:
   AttackParticle:
   - {fileID: 198274495757603134, guid: 69948d59fc595a84dacc076941951aaf, type: 3}
   - {fileID: 198662300647181020, guid: fbab27c98b168764eb295cfff1e9f61f, type: 3}
+  projectileSpeed: 10
+  firePoint: {fileID: 1536901535}
+  bulletProjectile: {fileID: 8191288703246674628, guid: c4a1d9c3ef92a1344869a0fade5d966f, type: 3}
 --- !u!54 &1040049622
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2906,6 +2909,9 @@ MonoBehaviour:
   AttackParticle:
   - {fileID: 198274495757603134, guid: 69948d59fc595a84dacc076941951aaf, type: 3}
   - {fileID: 198662300647181020, guid: fbab27c98b168764eb295cfff1e9f61f, type: 3}
+  projectileSpeed: 0
+  firePoint: {fileID: 0}
+  bulletProjectile: {fileID: 0}
 --- !u!1 &1266706369
 GameObject:
   m_ObjectHideFlags: 0

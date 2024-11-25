@@ -58,17 +58,17 @@ private void EngageTarget()
     {
         agent.SetDestination(TargetPos.position);
     }
-    protected override void Attack()
+    public override void Attack()
     {
         Debug.Log("АјАн");
     }
-    protected override IEnumerator TakeDamage(float damage)
+    public override IEnumerator TakeDamage(float damage)
     {
         yield return null;
         curHp -= damage;
         Dead();
     }
-    protected override void Dead()
+    public override void Dead()
     {
         isDead = true;
 
